@@ -29,6 +29,8 @@ def speak(text):
 font = cv2.FONT_HERSHEY_PLAIN
 starting_time = time.time()
 frame_id = 0
+
+
 while True:
     _, frame = cap.read()
     frame_id += 1
@@ -74,11 +76,22 @@ while True:
             confidence = confidences[i]
             color = colors[class_ids[i]]
             cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
-            cv2.putText(frame, label + " " + str(round(confidence, 2)), (x, y + 30), font, 3, color, 3)
-            speak(f"I see a {label}")
+            
+            # Compute object position relative to the frame center
+            object_center_x = x + w / 2
+            if object_center_x < width / 3:
+                location = "left"
+            elif object_center_x < 2 * width / 3:
+                location = "center"
+            else:
+                location = "right"
+            
+            cv2.putText(frame, f"{label} {str(round(confidence, 2))} {location}", (x, y + 30), font, 3, color, 3)
+            
+            # Voice output including object label and location
+            speak(f"I see a {label} on the {location}")
 
-
-
+    
     elapsed_time = time.time() - starting_time
     fps = frame_id / elapsed_time
     cv2.putText(frame, "FPS: " + str(round(fps, 2)), (10, 50), font, 4, (0, 0, 0), 3)
